@@ -13,6 +13,12 @@ namespace ClinicService.Data
         public virtual DbSet<Pet> Pets { get; set; }//ссылка на таблицу
         public virtual DbSet<Consultation> Consultations { get; set; }//ссылка на таблицу
 
+
+
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<AccountSession> AccountSessions { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

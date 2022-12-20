@@ -22,6 +22,87 @@ namespace ClinicService.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
+            modelBuilder.Entity("ClinicService.Data.Account", b =>
+                {
+                    b.Property<int>("AccountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccountId"), 1L, 1);
+
+                    b.Property<string>("EMail")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("Locked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PasswordSalt")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SecondName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.HasKey("AccountId");
+
+                    b.ToTable("Accounts");
+                });
+
+            modelBuilder.Entity("ClinicService.Data.AccountSession", b =>
+                {
+                    b.Property<int>("SessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SessionId"), 1L, 1);
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SessionToken")
+                        .IsRequired()
+                        .HasMaxLength(384)
+                        .HasColumnType("nvarchar(384)");
+
+                    b.Property<DateTime?>("TimeClosed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TimeLastRequest")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SessionId");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("AccountSessions");
+                });
+
             modelBuilder.Entity("ClinicService.Data.Client", b =>
                 {
                     b.Property<int>("ClientId")
@@ -107,6 +188,17 @@ namespace ClinicService.Data.Migrations
                     b.ToTable("Pets");
                 });
 
+            modelBuilder.Entity("ClinicService.Data.AccountSession", b =>
+                {
+                    b.HasOne("ClinicService.Data.Account", "Account")
+                        .WithMany("Sessions")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("ClinicService.Data.Consultation", b =>
                 {
                     b.HasOne("ClinicService.Data.Client", "Client")
@@ -135,6 +227,11 @@ namespace ClinicService.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("ClinicService.Data.Account", b =>
+                {
+                    b.Navigation("Sessions");
                 });
 
             modelBuilder.Entity("ClinicService.Data.Client", b =>
