@@ -1,29 +1,26 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	 <GenerateDocumentationFile>true</GenerateDocumentationFile>  
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Protos\auth.proto" />
     <None Remove="Protos\clinic.proto" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Api.CommonProtos" Version="2.7.0" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.48.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.48.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.9" />
+    <PackageReference Include="Grpc.AspNetCore.Web" Version="2.50.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Grpc.JsonTranscoding" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Grpc.Swagger" Version="0.3.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.9">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,8 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Protobuf Include="Protos\auth.proto" GrpcServices="Server" />
-    <Protobuf Include="Protos\clinic.proto" />
+    <Protobuf Include="Protos\clinic.proto" GrpcServices="Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="google\api\annotations.proto" GrpcServices="Server" />
+    <None Update="google\api\http.proto" GrpcServices="Server" />
   </ItemGroup>
 
 </Project>
