@@ -21,6 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Protobuf Include="..\ClinicService\Protos\auth.proto" GrpcServices="Client">
+      <Link>Protos\auth.proto</Link>
+    </Protobuf>
     <Protobuf Include="..\ClinicService\Protos\clinic.proto" GrpcServices="Client">
       <Link>Protos\clinic.proto</Link>
     </Protobuf>

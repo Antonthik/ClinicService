@@ -24,12 +24,21 @@ namespace ClinicService
             //Настройка сервиса для прослушивания на порту
             //все входящие подключения обрабатываются в контексте протокола Http2 
             //gRPC работает только по Http2
+            //builder.WebHost.ConfigureKestrel(options =>
+            //{
+            //    options.Listen(IPAddress.Any, 5001, listenOptions =>
+            //    {
+            //        listenOptions.Protocols = HttpProtocols.Http2;
+            //    });
+            //});
             builder.WebHost.ConfigureKestrel(options =>
             {
                 options.Listen(IPAddress.Any, 5001, listenOptions =>
                 {
                     listenOptions.Protocols = HttpProtocols.Http2;
+                    listenOptions.UseHttps("C:/developmentcert.pfx", "12345");//сертификат сами создали - экспорт из iis
                 });
+
             });
 
             builder.Services.AddGrpc();
