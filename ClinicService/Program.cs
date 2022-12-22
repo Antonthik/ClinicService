@@ -1,11 +1,15 @@
 using ClinicService.Data;
 using ClinicService.Services;
 using ClinicService.Services.Impl;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using NLog.Web;
 using System.Net;
+using System.Text;
 
 namespace ClinicService
 {
@@ -75,12 +79,78 @@ namespace ClinicService
 
 
 
+            #region Configure Services
+
+            builder.Services.AddSingleton<IAuthenticateService, AuthenticateService>();
+
+            #endregion
+
+            #region Configure JWT
+
+            //для всех входящих запросов необходимо проходить идентификацию.
+            builder.Services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+             
+            // параметры токенов, в том числе правила валидация токена, чтобы не прописывать для каждого метода - централизовано указываем здесь
+            .AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters{
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(AuthenticateService.SecretKey)),// SecretKey-используем для валидации тот же ключ, который используем при генерации
+                    ValidateIssuer = false, // true
+                    ValidateAudience = false, // true
+                    ValidIssuer = builder.Configuration["Settings:Security:Issuer"],
+                    ValidAudience = builder.Configuration["Settings:Security:Audience"],
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            #endregion
+
+
+
+
             // Add services to the container.
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Title = "Сервис клиники",
+                    Version = "v1",
+                });
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+                {
+                    Description = "JWT Authorization header using the Bearer scheme(Example: 'Bearer 12345abcdef')",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme()
+                        {
+                            Reference = new OpenApiReference()
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        Array.Empty<string>()
+                    }
+                });
+            });
+
 
             var app = builder.Build();
 
@@ -91,6 +161,9 @@ namespace ClinicService
                 app.UseSwaggerUI();
             }
 
+            app.UseRouting();
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             //app.UseHttpLogging();
@@ -104,7 +177,7 @@ namespace ClinicService
 
             app.MapControllers();
 
-            app.UseRouting();//чтобы организовать машруты для запросов
+           // app.UseRouting();//чтобы организовать машруты для запросов
 
             app.UseEndpoints(endpoints =>
             {
